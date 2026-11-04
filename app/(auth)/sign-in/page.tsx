@@ -1,11 +1,13 @@
+
 'use client'
 
 import { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
-import { AiFillGithub, AiOutlineArrowLeft } from "react-icons/ai";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { signIn } from "@/lib/auth-client";
+
+import { SiGoogle } from "@icons-pack/react-simple-icons";
+import { MoveLeft } from "lucide-react";
 
 const SignInPage = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -13,6 +15,7 @@ const SignInPage = () => {
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
+
         const formData = new FormData(e.currentTarget);
         const data = Object.fromEntries(formData.entries());
 
@@ -21,8 +24,8 @@ const SignInPage = () => {
                 email: String(data.email).trim(),
                 password: data.password as string,
                 rememberMe: true,
-                callbackURL: '/'
-            })
+                callbackURL: '/',
+            });
 
             if (error) {
                 toast.error(error.message || "Failed to sign in.");
@@ -32,7 +35,6 @@ const SignInPage = () => {
             if (resData) {
                 toast.success("You have successfully signed in");
             }
-
         } catch (error) {
             console.error("Unexpected sign-in error:", error);
             toast.error("Something went wrong. Please try again.");
@@ -42,72 +44,136 @@ const SignInPage = () => {
     };
 
     const handleGoogleSignIn = async () => {
-        const { error } = await signIn.social({
-            provider: "google",
-            callbackURL: "/",
-        });
+        try {
+            const { error } = await signIn.social({
+                provider: "google",
+                callbackURL: "/",
+            });
 
-        if (error) {
-            toast.error(error.message as string);
-            console.error("Google sign-in failed:", error);
-            return;
+            if (error) {
+                toast.error(error.message || "Google sign-in failed.");
+                console.error("Google sign-in failed:", error);
+                return;
+            }
+
+            toast.success("Google sign-in initiated");
+        } catch (error) {
+            console.error("Unexpected Google sign-in error:", error);
+            toast.error("Something went wrong. Please try again.");
         }
-
-        toast.success("Google sign-in initiated");
-
-
-    };
-
-    const handleGithubSignIn = async () => {
-        const { error } = await signIn.social({
-            provider: "github",
-            callbackURL: "/",
-        });
-
-        if (error) {
-            toast.error("GitHub sign-in failed");
-            console.error("GitHub sign-in failed:", error);
-            return;
-        }
-
-        toast.success("GitHub sign-in initiated");
     };
 
     return (
-        <div className="flex min-h-screen flex-col items-center text-center justify-center gap-4 py-6 md:py-0">
-            <h1 className='font-bold text-3xl'>Sign In</h1>
-            <h2 className='text-slate-600 w-[80%]'>Log in to your account to see detailed prices, market comparisons, and profiles</h2>
+        <main className="min-h-screen bg-base-200 px-4 py-12 sm:px-6 flex items-center justify-center">
 
-            <div className="fieldset bg-base-200 border-base-300 rounded-box w-auto border p-4">
-                <form onSubmit={onSubmit}>
-                    <fieldset className="w-auto flex flex-col">
-                        <legend className="fieldset-legend"></legend>
+            <div className="w-full max-w-md">
 
-                        <label className="label font-bold">Email</label>
-                        <input required name="email" type="email" className="input w-full" placeholder="you@example.com" autoComplete="email" />
+                {/* Sign-in card */}
+                <div className="rounded-2xl border border-base-300 bg-base-100 p-6 shadow-sm sm:p-8">
 
-                        <label className="label font-bold">Password</label>
-                        <input required name="password" type="password" className="input w-full" placeholder="Atleast 8 characters" autoComplete="current-password" />
+                    {/* Heading */}
+                    <div className="mb-8 text-center">
+                        <h1 className="text-3xl font-bold tracking-tight text-base-content">
+                            Welcome back
+                        </h1>
 
-                        <button disabled={isLoading} className="btn btn-neutral mt-4">{isLoading ? "Signing in..." : "Log in"}</button>
-                    </fieldset>
-                </form>
+                        <p className="mt-3 text-sm leading-relaxed text-base-content/65">
+                            Log in to your account to list a studio, book your
+                            place, and build your creative profile.
+                        </p>
+                    </div>
 
-                <div className="divider">OR</div>
-                <div className='flex flex-col md:flex-row gap-2'>
-                    <button onClick={() => handleGoogleSignIn()} disabled={isLoading} className='btn btn-outline'><FcGoogle />Sign in with Google</button>
-                    <button onClick={() => handleGithubSignIn()} disabled={isLoading} className='btn btn-outline border-stale-200'><AiFillGithub />Sign In with Github"</button>
+                    {/* Email and password form */}
+                    <form onSubmit={onSubmit} className="space-y-5">
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="email"
+                                className="text-sm font-semibold text-base-content"
+                            >
+                                Email address
+                            </label>
+
+                            <input
+                                id="email"
+                                required
+                                name="email"
+                                type="email"
+                                className="input input-bordered w-full bg-base-100 focus:border-primary focus:outline-none"
+                                placeholder="you@example.com"
+                                autoComplete="email"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="password"
+                                className="text-sm font-semibold text-base-content"
+                            >
+                                Password
+                            </label>
+
+                            <input
+                                id="password"
+                                required
+                                name="password"
+                                type="password"
+                                className="input input-bordered w-full bg-base-100 focus:border-primary focus:outline-none"
+                                placeholder="Enter your password"
+                                autoComplete="current-password"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="btn btn-primary mt-2 w-full border-none text-base font-semibold"
+                        >
+                            {isLoading ? "Signing in..." : "Sign in"}
+                        </button>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="divider my-6 text-xs text-base-content/50">
+                        OR CONTINUE WITH
+                    </div>
+
+                    {/* Google sign-in */}
+                    <button
+                        type="button"
+                        onClick={handleGoogleSignIn}
+                        disabled={isLoading}
+                        className="btn btn-outline w-full border-base-300 bg-base-100 text-base-content hover:border-primary hover:bg-primary hover:text-primary-content"
+                    >
+                        <SiGoogle size={18} />
+                        Continue with Google
+                    </button>
+
+                    {/* Registration link */}
+                    <p className="mt-7 text-center text-sm text-base-content/70">
+                        Don't have an account?{" "}
+                        <Link
+                            href="/sign-up"
+                            scroll={false}
+                            className="font-semibold text-primary hover:text-secondary hover:underline"
+                        >
+                            Create an account
+                        </Link>
+                    </p>
                 </div>
-                <div className="text-center text-sm"><h1>Do not have an account? <Link href="/sign-up" scroll={false} className="text-green-700">Create an account</Link></h1></div>
-            </div>
 
-            <div className="text-slate-700 text-base">
-                <Link href="/" className="flex items-center gap-2">
-                    <AiOutlineArrowLeft />
-                    <h3>return to home page</h3>
-                </Link>
+                {/* Back to home */}
+                <div className="mt-7 flex justify-center">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 text-sm font-medium text-base-content/65 transition-colors hover:text-primary"
+                    >
+                        <MoveLeft size={18} />
+                        Return to home page
+                    </Link>
+                </div>
+
             </div>
-        </div>
+        </main>
     );
 };
 

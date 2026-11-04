@@ -112,14 +112,14 @@ export default function Navbar({
                     {!user ? (
                         <>
                             <Link
-                                href="/login"
+                                href="/sign-in"
                                 className="text-sm font-semibold text-[#444444] transition hover:text-[#F06435]"
                             >
                                 Login
                             </Link>
 
                             <Link
-                                href="/register"
+                                href="/sign-up"
                                 className="rounded-lg bg-[#F06435] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#D94C25]"
                             >
                                 Host Your Space

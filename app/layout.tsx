@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 
 import { Toaster } from "react-hot-toast";
 
+import Footer from "@/components/Shared/Footer";
+import Navbar from "@/components/Shared/Navbar";
+
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
@@ -30,7 +33,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <Toaster />
+        <Navbar /> 
         {children}
+        <Footer />
         </body>
     </html>
   );

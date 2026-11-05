@@ -50,9 +50,117 @@
   --border: 1px;
 }
 
+@import "tailwindcss";
+
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "studiospace";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* Backgrounds */
+  --color-base-100: #FAF9F6;
+  --color-base-200: #F3F1EC;
+  --color-base-300: #EAE8E3;
+  --color-base-content: #242424;
+
+  /* Brand colors */
+  --color-primary: #F06435;
+  --color-primary-content: #FFFFFF;
+
+  --color-secondary: #D94C25;
+  --color-secondary-content: #FFFFFF;
+
+  --color-accent: #FCE8DF;
+  --color-accent-content: #242424;
+
+  /* Neutral colors */
+  --color-neutral: #242424;
+  --color-neutral-content: #FFFFFF;
+
+  /* Status colors */
+  --color-success: #23865B;
+  --color-success-content: #FFFFFF;
+
+  --color-warning: #D89A2B;
+  --color-warning-content: #242424;
+
+  --color-error: #C94444;
+  --color-error-content: #FFFFFF;
+
+  --color-info: #3984B8;
+  --color-info-content: #FFFFFF;
+
+  /* Rounded corners */
+  --radius-selector: 0.75rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+
+  --border: 1px;
+}
+
+@plugin "daisyui/theme" {
+  name: "studiospace-dark";
+  prefersdark: true;
+  color-scheme: dark;
+
+  /* Backgrounds: Deep charcoal with a warm undertone */
+  --color-base-100: #1A1917; 
+  --color-base-200: #242320; 
+  --color-base-300: #302E2B; 
+  --color-base-content: #FAF9F6; 
+
+  /* Brand colors */
+  --color-primary: #FF774C; 
+  --color-primary-content: #1A1917;
+
+  --color-secondary: #F06435; 
+  --color-secondary-content: #FFFFFF;
+
+  --color-accent: #3A261F; 
+  --color-accent-content: #FF9673;
+
+  /* Neutral colors */
+  --color-neutral: #FAF9F6;
+  --color-neutral-content: #1A1917;
+
+  /* Status colors */
+  --color-success: #2EA874;
+  --color-success-content: #1A1917;
+
+  --color-warning: #EBB244;
+  --color-warning-content: #1A1917;
+
+  --color-error: #E65C5C;
+  --color-error-content: #1A1917;
+
+  --color-info: #519CD1;
+  --color-info-content: #1A1917;
+
+  /* Structural consistency */
+  --radius-selector: 0.75rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --border: 1px;
+}
+
 /* Additional StudioSpace brand utilities */
 @theme {
-  --color-brand: #F06435;
+  --color-brand: #F06435; 
+  --color-brand-dark: #D94C25;
+  --color-warm-white: #FAF9F6;
+  --color-charcoal: #242424;
+  --color-muted: #777777;
+  --color-warm-border: #EAE8E3;
+  --color-success-green: #23865B;
+}
+
+
+/* Additional StudioSpace brand utilities */
+@theme {
+  --color-brand: #F06435; 
   --color-brand-dark: #D94C25;
   --color-warm-white: #FAF9F6;
   --color-charcoal: #242424;

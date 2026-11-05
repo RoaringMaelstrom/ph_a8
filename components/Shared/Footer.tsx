@@ -1,12 +1,15 @@
 
 import Link from "next/link";
 import {
-  MoveRight,
   Mail,
   MapPin,
 } from "lucide-react";
 
-import { SiFacebook, SiInstagram, SiYoutube } from "@icons-pack/react-simple-icons";
+import {
+  SiFacebook,
+  SiInstagram,
+  SiYoutube,
+} from "@icons-pack/react-simple-icons";
 
 const categories = [
   { name: "Photo Studios", href: "/studios?category=photo-studios" },
@@ -39,7 +42,8 @@ function XIcon() {
 
 export default function Footer() {
   return (
-    <footer className="bg-[#242424] text-white">
+    <footer className="bg-base-100 text-base-content">
+
       {/* Main Footer */}
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-10">
@@ -50,30 +54,30 @@ export default function Footer() {
               href="/"
               className="inline-flex items-center gap-2"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F06435] text-xl font-bold">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-xl font-bold text-primary-content">
                 S
               </div>
 
               <span className="text-2xl font-bold tracking-tight">
-                Studio<span className="text-[#F06435]">Space</span>
+                Studio<span className="text-primary">Space</span>
               </span>
             </Link>
 
-            <p className="mt-5 max-w-sm text-sm leading-7 text-gray-400">
+            <p className="mt-5 max-w-sm text-sm leading-7 text-base-content/65">
               A creative space for every great idea. Discover and book
               inspiring studios, or share your own space with a community
               of creators.
             </p>
 
             {/* Contact */}
-            <div className="mt-6 space-y-3 text-sm text-gray-400">
+            <div className="mt-6 space-y-3 text-sm text-base-content/65">
               <p className="flex items-center gap-3">
-                <Mail size={16} className="text-[#F06435]" />
+                <Mail size={16} className="text-primary" />
                 hello@studiospace.com
               </p>
 
               <p className="flex items-center gap-3">
-                <MapPin size={16} className="text-[#F06435]" />
+                <MapPin size={16} className="text-primary" />
                 Connecting creative spaces worldwide
               </p>
             </div>
@@ -85,17 +89,17 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="rounded-full border border-white/15 p-3 text-gray-300 transition hover:border-[#F06435] hover:bg-[#F06435] hover:text-white"
+                className="rounded-full border border-base-300 p-3 text-base-content/70 transition hover:border-primary hover:bg-primary hover:text-primary-content"
               >
                 <SiInstagram size={17} />
               </a>
 
               <a
-                href="https://www.Facebook.com/"
+                href="https://www.facebook.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                className="rounded-full border border-white/15 p-3 text-gray-300 transition hover:border-[#F06435] hover:bg-[#F06435] hover:text-white"
+                className="rounded-full border border-base-300 p-3 text-base-content/70 transition hover:border-primary hover:bg-primary hover:text-primary-content"
               >
                 <SiFacebook size={17} />
               </a>
@@ -105,7 +109,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="X"
-                className="rounded-full border border-white/15 p-3 text-gray-300 transition hover:border-[#F06435] hover:bg-[#F06435] hover:text-white"
+                className="rounded-full border border-base-300 p-3 text-base-content/70 transition hover:border-primary hover:bg-primary hover:text-primary-content"
               >
                 <XIcon />
               </a>
@@ -115,7 +119,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
-                className="rounded-full border border-white/15 p-3 text-gray-300 transition hover:border-[#F06435] hover:bg-[#F06435] hover:text-white"
+                className="rounded-full border border-base-300 p-3 text-base-content/70 transition hover:border-primary hover:bg-primary hover:text-primary-content"
               >
                 <SiYoutube size={17} />
               </a>
@@ -124,14 +128,16 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="lg:col-span-2 lg:col-start-6">
-            <h3 className="text-base font-semibold">Quick Links</h3>
+            <h3 className="text-base font-semibold">
+              Quick Links
+            </h3>
 
             <ul className="mt-6 space-y-4">
               {quickLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-sm text-gray-400 transition hover:pl-1 hover:text-[#F06435]"
+                    className="text-sm text-base-content/65 transition hover:pl-1 hover:text-primary"
                   >
                     {link.name}
                   </Link>
@@ -142,14 +148,16 @@ export default function Footer() {
 
           {/* Categories */}
           <div className="lg:col-span-2">
-            <h3 className="text-base font-semibold">Explore Spaces</h3>
+            <h3 className="text-base font-semibold">
+              Explore Spaces
+            </h3>
 
             <ul className="mt-6 space-y-4">
               {categories.map((category) => (
                 <li key={category.name}>
                   <Link
                     href={category.href}
-                    className="text-sm text-gray-400 transition hover:pl-1 hover:text-[#F06435]"
+                    className="text-sm text-base-content/65 transition hover:pl-1 hover:text-primary"
                   >
                     {category.name}
                   </Link>
@@ -159,74 +167,35 @@ export default function Footer() {
           </div>
 
           {/* Newsletter */}
-          {/* <div className="lg:col-span-3">
-            <h3 className="text-base font-semibold">
-              Stay in the Creative Loop
-            </h3>
+          {/* Newsletter section can be added here when needed */}
 
-            <p className="mt-6 text-sm leading-6 text-gray-400">
-              Get updates on inspiring spaces, creative opportunities,
-              and the latest StudioSpace news.
-            </p>
-
-            <form
-              action="/api/newsletter"
-              method="POST"
-              className="mt-5"
-            >
-              <label htmlFor="footer-email" className="sr-only">
-                Email address
-              </label>
-
-              <div className="flex items-center rounded-lg border border-white/15 bg-white/5 p-1.5 transition focus-within:border-[#F06435]">
-                <input
-                  id="footer-email"
-                  type="email"
-                  name="email"
-                  placeholder="Your email address"
-                  required
-                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-gray-500"
-                />
-
-                <button
-                  type="submit"
-                  aria-label="Subscribe to newsletter"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#F06435] text-white transition hover:bg-[#D94C25]"
-                >
-                  <MoveRight size={18} />
-                </button>
-              </div>
-            </form>
-
-            <p className="mt-3 text-xs text-gray-500">
-              By subscribing, you agree to receive updates from StudioSpace.
-            </p>
-          </div> */}
-        </div> 
+        </div>
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-white/10">
+      <div className="border-t border-base-300">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 text-center sm:flex-row sm:text-left lg:px-8">
-          <p className="text-xs text-gray-500">
+
+          <p className="text-xs text-base-content/55">
             © 2026 StudioSpace. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-6 text-xs text-gray-500">
+          <div className="flex items-center gap-6 text-xs text-base-content/55">
             <Link
               href="/terms"
-              className="transition hover:text-[#F06435]"
+              className="transition hover:text-primary"
             >
               Terms of Service
             </Link>
 
             <Link
               href="/privacy"
-              className="transition hover:text-[#F06435]"
+              className="transition hover:text-primary"
             >
               Privacy Policy
             </Link>
           </div>
+
         </div>
       </div>
     </footer>

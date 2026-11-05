@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 
 import Footer from "@/components/Shared/Footer";
 import Navbar from "@/components/Shared/Navbar";
+import ThemeProvider from "@/components/Context/ThemeProvider";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -28,14 +29,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="en" suppressHydrationWarning
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">
         <Toaster />
+        <ThemeProvider>
         <Navbar /> 
         {children}
         <Footer />
+        </ThemeProvider>
         </body>
     </html>
   );

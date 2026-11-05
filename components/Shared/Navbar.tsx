@@ -4,6 +4,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { signOut, useSession } from "@/lib/auth-client";
+
 import {
     Menu,
     X,
@@ -15,15 +17,8 @@ import {
     LogOut,
     UserRound,
 } from "lucide-react";
-import ThemeToggle from "./ThemeToggle";
 
-type NavbarProps = {
-    user?: {
-        name: string;
-        image?: string | null;
-    } | null;
-    onLogout?: () => void;
-};
+import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
     { name: "Home", href: "/" },
@@ -39,12 +34,30 @@ const dashboardLinks = [
     { name: "My Bookings", href: "/my-bookings", icon: CalendarDays },
 ];
 
-export default function Navbar({
-    user = null,
-    onLogout,
-}: NavbarProps) {
+export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [isSigningOut, setIsSigningOut] = useState(false);
+
+    // Better Auth session
+    const { data: session, isPending } = useSession();
+
+    // Get the authenticated user
+    const user = session?.user;
+
+    // Sign out
+    const handleSignOut = async () => {
+        try {
+            setIsSigningOut(true);
+
+            await signOut({
+                callbackURL: "/",
+            });
+        } catch (error) {
+            console.error("Sign out failed:", error);
+            setIsSigningOut(false);
+        }
+    };
 
     const pathname = usePathname();
 
@@ -56,13 +69,15 @@ export default function Navbar({
             : pathname === href || pathname.startsWith(href + "/");
 
     const navLinkClass = (href: string) =>
-        `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive(href)
-            ? "bg-primary/10 text-primary"
-            : "text-base-content/75 hover:bg-base-200 hover:text-primary"
+        `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+            isActive(href)
+                ? "bg-primary/10 text-primary"
+                : "text-base-content/75 hover:bg-base-200 hover:text-primary"
         }`;
 
     const userMenuRef = useRef<HTMLDivElement>(null);
 
+    // Close account dropdown when clicking outside or pressing Escape
     useEffect(() => {
         if (!userMenuOpen) return;
 
@@ -78,6 +93,7 @@ export default function Navbar({
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
                 setUserMenuOpen(false);
+
                 userMenuRef.current
                     ?.querySelector<HTMLButtonElement>("button")
                     ?.focus();
@@ -113,7 +129,7 @@ export default function Navbar({
                 </Link>
 
                 {/* Desktop Navigation */}
-                <div className="hidden items-center gap-2 xl:gap-4 lg:flex">
+                <div className="hidden items-center gap-2 lg:flex xl:gap-4">
                     {navLinks.map((link) => (
                         <Link
                             key={link.name}
@@ -127,9 +143,12 @@ export default function Navbar({
 
                 {/* Desktop Actions */}
                 <div className="hidden items-center gap-3 lg:flex">
-                    {!user ? (
+                    <ThemeToggle />
+
+                    {isPending ? (
+                        <div className="h-10 w-28 animate-pulse rounded-full bg-base-200" />
+                    ) : !user ? (
                         <>
-                            <ThemeToggle />
                             <Link
                                 href="/sign-in"
                                 className="rounded-lg px-3 py-2 text-sm font-semibold text-base-content/80 transition hover:text-primary"
@@ -146,7 +165,6 @@ export default function Navbar({
                         </>
                     ) : (
                         <>
-                            <ThemeToggle />
                             <Link
                                 href="/add-studio"
                                 className="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-content transition hover:bg-secondary"
@@ -154,11 +172,13 @@ export default function Navbar({
                                 + Host Your Space
                             </Link>
 
-                            {/* Improved User Dropdown */}
+                            {/* Account Dropdown */}
                             <div className="relative" ref={userMenuRef}>
                                 <button
                                     type="button"
-                                    onClick={() => setUserMenuOpen((prev) => !prev)}
+                                    onClick={() =>
+                                        setUserMenuOpen((prev) => !prev)
+                                    }
                                     aria-expanded={userMenuOpen}
                                     aria-haspopup="menu"
                                     aria-controls="account-menu"
@@ -178,13 +198,14 @@ export default function Navbar({
                                     )}
 
                                     <span className="max-w-32 truncate text-sm font-semibold text-base-content">
-                                        {user.name}
+                                        {user.name || "My Account"}
                                     </span>
 
                                     <ChevronDown
                                         size={16}
-                                        className={`shrink-0 text-base-content/60 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""
-                                            }`}
+                                        className={`shrink-0 text-base-content/60 transition-transform duration-200 ${
+                                            userMenuOpen ? "rotate-180" : ""
+                                        }`}
                                     />
                                 </button>
 
@@ -211,10 +232,11 @@ export default function Navbar({
 
                                             <div className="min-w-0">
                                                 <p className="truncate text-sm font-bold text-base-content">
-                                                    {user.name}
+                                                    {user.name || "My Account"}
                                                 </p>
-                                                <p className="mt-0.5 text-xs text-base-content/60">
-                                                    StudioSpace Account
+
+                                                <p className="mt-0.5 truncate text-xs text-base-content/60">
+                                                    {user.email}
                                                 </p>
                                             </div>
                                         </div>
@@ -234,13 +256,20 @@ export default function Navbar({
                                                         key={link.name}
                                                         href={link.href}
                                                         role="menuitem"
-                                                        onClick={() => setUserMenuOpen(false)}
-                                                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${active
-                                                            ? "bg-primary/10 font-semibold text-primary"
-                                                            : "text-base-content/75 hover:bg-base-200 hover:text-primary"
-                                                            }`}
+                                                        onClick={() =>
+                                                            setUserMenuOpen(false)
+                                                        }
+                                                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors ${
+                                                            active
+                                                                ? "bg-primary/10 font-semibold text-primary"
+                                                                : "text-base-content/75 hover:bg-base-200 hover:text-primary"
+                                                        }`}
                                                     >
-                                                        <Icon size={18} className="shrink-0" />
+                                                        <Icon
+                                                            size={18}
+                                                            className="shrink-0"
+                                                        />
+
                                                         <span>{link.name}</span>
 
                                                         {active && (
@@ -256,20 +285,20 @@ export default function Navbar({
                                             <button
                                                 type="button"
                                                 role="menuitem"
-                                                onClick={() => {
-                                                    setUserMenuOpen(false);
-                                                    onLogout?.();
-                                                }}
-                                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-error transition-colors hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error"
+                                                disabled={isSigningOut}
+                                                onClick={handleSignOut}
+                                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-error transition-colors hover:bg-error/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 <LogOut size={18} />
-                                                Logout
+
+                                                {isSigningOut
+                                                    ? "Signing out..."
+                                                    : "Logout"}
                                             </button>
                                         </div>
                                     </div>
                                 )}
                             </div>
-
                         </>
                     )}
                 </div>
@@ -277,7 +306,7 @@ export default function Navbar({
                 {/* Mobile Menu Toggle */}
                 <button
                     type="button"
-                    onClick={() => setMobileOpen(!mobileOpen)}
+                    onClick={() => setMobileOpen((prev) => !prev)}
                     aria-label={mobileOpen ? "Close menu" : "Open menu"}
                     aria-expanded={mobileOpen}
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-base-content transition hover:bg-base-200 lg:hidden"
@@ -289,6 +318,7 @@ export default function Navbar({
             {/* Mobile and Tablet Navigation */}
             {mobileOpen && (
                 <div className="border-t border-base-300 bg-base-100 px-4 pb-6 pt-4 shadow-lg sm:px-6 lg:hidden">
+                    {/* Main Navigation */}
                     <div className="flex flex-col gap-1">
                         {navLinks.map((link) => (
                             <Link
@@ -301,9 +331,9 @@ export default function Navbar({
                             </Link>
                         ))}
                     </div>
-                    
+
                     {/* Theme Toggle */}
-                    <div className="mt-4 mx-4 flex items-center justify-between border-t border-base-300 pt-4">
+                    <div className="mx-4 mt-4 flex items-center justify-between border-t border-base-300 pt-4">
                         <span className="text-sm font-medium text-base-content">
                             Appearance
                         </span>
@@ -311,10 +341,15 @@ export default function Navbar({
                         <ThemeToggle />
                     </div>
 
-
                     <div className="my-4 border-t border-base-300" />
 
-                    {!user ? (
+                    {/* Authentication Loading */}
+                    {isPending ? (
+                        <div className="animate-pulse rounded-lg bg-base-200 px-4 py-3 text-center text-sm text-base-content/50">
+                            Checking account...
+                        </div>
+                    ) : !user ? (
+                        /* Logged Out */
                         <div className="flex flex-col gap-3">
                             <Link
                                 href="/sign-in"
@@ -333,7 +368,9 @@ export default function Navbar({
                             </Link>
                         </div>
                     ) : (
+                        /* Logged In */
                         <div>
+                            {/* Mobile Profile */}
                             <div className="mb-3 flex items-center gap-3 px-2">
                                 {user.image ? (
                                     <img
@@ -349,23 +386,30 @@ export default function Navbar({
 
                                 <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold text-base-content">
-                                        {user.name}
+                                        {user.name || "My Account"}
                                     </p>
-                                    <p className="text-xs text-base-content/60">
-                                        My Account
+
+                                    <p className="truncate text-xs text-base-content/60">
+                                        {user.email}
                                     </p>
                                 </div>
                             </div>
 
+                            {/* Mobile Dashboard Links */}
                             {dashboardLinks.map((link) => {
                                 const Icon = link.icon;
+                                const active = isActive(link.href);
 
                                 return (
                                     <Link
                                         key={link.name}
                                         href={link.href}
                                         onClick={closeMobileMenu}
-                                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-base-content/75 transition hover:bg-primary/10 hover:text-primary"
+                                        className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors ${
+                                            active
+                                                ? "bg-primary/10 font-semibold text-primary"
+                                                : "text-base-content/75 hover:bg-primary/10 hover:text-primary"
+                                        }`}
                                     >
                                         <Icon size={18} />
                                         {link.name}
@@ -373,16 +417,18 @@ export default function Navbar({
                                 );
                             })}
 
+                            {/* Mobile Logout */}
                             <button
                                 type="button"
-                                onClick={() => {
-                                    closeMobileMenu();
-                                    onLogout?.();
-                                }}
-                                className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-error transition hover:bg-error/10"
+                                disabled={isSigningOut}
+                                onClick={handleSignOut}
+                                className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-error transition hover:bg-error/10 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <LogOut size={18} />
-                                Logout
+
+                                {isSigningOut
+                                    ? "Signing out..."
+                                    : "Logout"}
                             </button>
                         </div>
                     )}

@@ -1,11 +1,20 @@
 import { betterAuth } from "better-auth";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
+import { jwt } from "better-auth/plugins";
 
 const client = new MongoClient(process.env.BETTER_AUTH_DB_URL as string);
-const db = client.db();
+const db = client.db("StudioSpace");
 
 export const auth = betterAuth({
+    baseURL: process.env.BETTER_AUTH_URL,
+    trustedOrigins: [
+        "http://localhost:3000",
+        "https://ph-a8-two.vercel.app/",
+    ],
+    
+    database: mongodbAdapter(db, { client }),
+
     emailAndPassword: {
         enabled: true,
     },
@@ -14,7 +23,7 @@ export const auth = betterAuth({
         google: {
             clientId: process.env.GOOGLE_CLIENT_ID as string,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-        }
+        },
     },
 
     account: {
@@ -24,5 +33,14 @@ export const auth = betterAuth({
         },
     },
 
-    database: mongodbAdapter(db, { client }),
+    session: {
+        cookieCache: {
+            enabled: true,
+            strategy: "jwt",
+            maxAge: 60 * 60 * 24 * 15,
+        },
+    },
+
+    plugins: [jwt()],
+
 });

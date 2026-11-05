@@ -10,7 +10,9 @@ import { SiGoogle } from "@icons-pack/react-simple-icons";
 import { MoveLeft } from "lucide-react";
 
 const SignInPage = () => {
+
     const [isLoading, setIsLoading] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -22,21 +24,22 @@ const SignInPage = () => {
         try {
             const { data: resData, error } = await signIn.email({
                 email: String(data.email).trim(),
-                password: data.password as string,
+                password: String(data.password),
                 rememberMe: true,
-                callbackURL: '/',
+                callbackURL: "/",
             });
 
             if (error) {
+                console.error("Email sign-in failed:", error);
                 toast.error(error.message || "Failed to sign in.");
                 return;
             }
 
             if (resData) {
-                toast.success("You have successfully signed in");
+                toast.success("You have successfully signed in.");
             }
-        } catch (error) {
-            console.error("Unexpected sign-in error:", error);
+        } catch (error: unknown) {
+            console.error("Unexpected email sign-in error:", error);
             toast.error("Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);
@@ -44,6 +47,8 @@ const SignInPage = () => {
     };
 
     const handleGoogleSignIn = async () => {
+        setIsGoogleLoading(true);
+
         try {
             const { error } = await signIn.social({
                 provider: "google",
@@ -51,15 +56,26 @@ const SignInPage = () => {
             });
 
             if (error) {
+                console.error("Google sign-in failed:", {
+                    error,
+                    details:
+                        error instanceof Error
+                            ? error.stack
+                            : JSON.stringify(
+                                error,
+                                Object.getOwnPropertyNames(error)
+                            ),
+                });
+
                 toast.error(error.message || "Google sign-in failed.");
-                console.error("Google sign-in failed:", error);
                 return;
             }
 
-            toast.success("Google sign-in initiated");
-        } catch (error) {
-            console.error("Unexpected Google sign-in error:", error);
-            toast.error("Something went wrong. Please try again.");
+            // Better Auth handles the OAuth redirect.
+            // No success toast is necessary here.
+        } 
+        finally {
+            setIsGoogleLoading(false);
         }
     };
 
@@ -141,16 +157,16 @@ const SignInPage = () => {
                     <button
                         type="button"
                         onClick={handleGoogleSignIn}
-                        disabled={isLoading}
+                        disabled={isGoogleLoading || isLoading}
                         className="btn btn-outline w-full border-base-300 bg-base-100 text-base-content hover:border-primary hover:bg-primary hover:text-primary-content"
                     >
                         <SiGoogle size={18} />
-                        Continue with Google
+                        {isGoogleLoading ? "Connecting to Google..." : "Continue with Google"}
                     </button>
 
                     {/* Registration link */}
                     <p className="mt-7 text-center text-sm text-base-content/70">
-                        Don't have an account?{" "}
+                        {`Don't have an account?${" "}`}
                         <Link
                             href="/sign-up"
                             scroll={false}

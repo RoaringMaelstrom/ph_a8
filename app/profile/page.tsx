@@ -1,7 +1,6 @@
 'use client'
 
 import { signOut, updateUser, useSession } from "@/lib/auth-client";
-import Image from "next/image";
 import toast from "react-hot-toast";
 
 const ProfilePage = () => {

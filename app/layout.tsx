@@ -4,12 +4,13 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 
 import { Toaster } from "react-hot-toast";
+import { Suspense } from "react";
 
 import Footer from "@/components/Shared/Footer";
 import Navbar from "@/components/Shared/Navbar";
 import ThemeProvider from "@/components/Context/ThemeProvider";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,11 +36,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <Toaster />
         <ThemeProvider>
-        <Navbar /> 
-        {children}
-        <Footer />
+          <Suspense>
+            <Navbar />
+          </Suspense>
+          {children}
+          <Footer />
         </ThemeProvider>
-        </body>
+      </body>
     </html>
   );
 }

@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import Banner from "@/components/Landing/Banner";
 import FeaturedSection from "@/components/Landing/FeaturedSection";
 import CategorySelection from "@/components/Landing/CategorySelection";
@@ -9,7 +11,9 @@ export default function Home() {
     <div>
       <Banner />
       <FeaturedSection />
-      <CategorySelection />
+      <Suspense>
+        <CategorySelection />
+      </Suspense>
       <HowItWorks />
       <HostGuarentee />
     </div>

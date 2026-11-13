@@ -1,6 +1,8 @@
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cacheLife } from "next/cache";
 import {
     MapPin,
     Users,
@@ -11,6 +13,8 @@ import {
     CheckCircle2,
     CalendarDays,
 } from "lucide-react";
+
+import StudioDetailsLoading from "./loading";
 
 interface Studio {
     _id: string;
@@ -38,32 +42,42 @@ const formatPrice = (price: number) =>
         maximumFractionDigits: 0,
     }).format(price);
 
-const StudioDetailsPage = async ({
+async function getStudio(id: string): Promise<Studio | null> {
+    "use cache";
+    cacheLife("days");
+
+    const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/studios/${id}`
+    );
+
+    if (response.status === 404) {
+        return null;
+    }
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch studio information.");
+    }
+
+    return response.json();
+}
+
+const StudioDetailsPage = ({ params }: StudioDetailsPageProps) => {
+    return (
+        <Suspense fallback={<StudioDetailsLoading />}>
+            <StudioDetailsContent params={params} />
+        </Suspense>
+    );
+};
+
+const StudioDetailsContent = async ({
     params,
 }: StudioDetailsPageProps) => {
     const { id } = await params;
 
-    let studio: Studio;
+    let studio: Studio | null = null;
 
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/studios/${id}`,
-            {
-                next: {
-                    revalidate: 86400,
-                }
-            }
-        );
-
-        if (response.status === 404) {
-            notFound();
-        }
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch studio information.");
-        }
-
-        studio = await response.json();
+        studio = await getStudio(id);
     } catch (error) {
         console.error("Studio details error:", error);
 
@@ -314,10 +328,9 @@ const StudioDetailsPage = async ({
 
                             {/* Booking CTA */}
                             <Link
-                                href="/sign-in"
-                                className="btn btn-primary mt-6 w-full"
+                                href={`/studios/${studio._id}/booking`}
+                                className="btn btn-primary w-full"
                             >
-                                <CalendarDays size={18} />
                                 Book This Studio
                             </Link>
 

@@ -1,5 +1,6 @@
 
 import Link from "next/link";
+import { cacheLife } from "next/cache";
 import { ArrowRight, MapPin, Star } from "lucide-react";
 
 interface Studio {
@@ -12,20 +13,26 @@ interface Studio {
     rating?: number;
 }
 
+async function getFeaturedStudios(): Promise<Studio[]> {
+    "use cache";
+    cacheLife("days");
+
+    const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/studios/featured`
+    );
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch featured studios");
+    }
+
+    return response.json();
+}
+
 const FeaturedSection = async () => {
     let studios: Studio[] = [];
 
     try {
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/studios/featured`,
-            {
-                cache: "no-store",
-            }
-        );
-
-        if (response.ok) {
-            studios = await response.json();
-        }
+        studios = await getFeaturedStudios();
     } catch (error) {
         console.error("Failed to fetch featured studios:", error);
     }

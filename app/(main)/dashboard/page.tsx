@@ -11,12 +11,11 @@ import {
   Clock,
   CheckCircle2,
   ArrowUpRight,
-  MapPin,
   LoaderCircle,
   LayoutDashboard,
 } from "lucide-react";
 
-import { useSession } from "@/lib/auth-client";
+import { useSession, authClient } from "@/lib/auth-client";
 
 interface Studio {
   _id: string;
@@ -55,6 +54,7 @@ const DashboardPage = () => {
   useEffect(() => {
     if (isPending || !session) return;
 
+
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
@@ -66,19 +66,46 @@ const DashboardPage = () => {
           throw new Error("API URL is not configured.");
         }
 
+        // Retrieve the JWT from Better Auth.
+        const { data, error } = await authClient.token();
+
+        if (error || !data?.token) {
+          throw new Error("Unable to retrieve authentication token.");
+        }
+
+        // Attach the JWT to both backend requests.
+        const headers = {
+          Authorization: `Bearer ${data.token}`,
+        };
+
         const [studioResponse, bookingResponse] = await Promise.all([
           fetch(`${apiUrl}/studios/mine`, {
-            credentials: "include",
+            headers,
             cache: "no-store",
           }),
+
           fetch(`${apiUrl}/bookings/mine`, {
-            credentials: "include",
+            headers,
             cache: "no-store",
           }),
         ]);
 
-        if (!studioResponse.ok || !bookingResponse.ok) {
-          throw new Error("Unable to load dashboard information.");
+        if (!studioResponse.ok) {
+          const error = await studioResponse.json();
+
+          throw new Error(
+            `Studios API (${studioResponse.status}): ${error.message || "Failed to fetch studios."
+            }`
+          );
+        }
+
+        if (!bookingResponse.ok) {
+          const error = await bookingResponse.json();
+
+          throw new Error(
+            `Bookings API (${bookingResponse.status}): ${error.message || "Failed to fetch bookings."
+            }`
+          );
         }
 
         const studioData = await studioResponse.json();
@@ -86,6 +113,7 @@ const DashboardPage = () => {
 
         setStudios(studioData);
         setBookings(bookingData);
+
       } catch (err) {
         console.error("Dashboard fetch error:", err);
         setError("We couldn't load your dashboard. Please try again.");
@@ -93,6 +121,7 @@ const DashboardPage = () => {
         setLoading(false);
       }
     };
+
 
     fetchDashboardData();
   }, [isPending, session]);

@@ -1,9 +1,25 @@
+import { Suspense } from "react";
+import { connection } from "next/server";
+
 import StudioListing from "@/components/Client/StudioListing";
 import type { Studio } from "@/components/Card/StudioCard";
 
-const StudiosPage = async () => {
+import StudiosLoading from "./loading";
+
+const StudiosPage = () => {
+  return (
+    <Suspense fallback={<StudiosLoading />}>
+      <StudiosList />
+    </Suspense>
+  );
+};
+
+const StudiosList = async () => {
   let studios: Studio[] = [];
   let error = false;
+
+  // Render at request time; the public listing must never be cached.
+  await connection();
 
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;

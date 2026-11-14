@@ -44,7 +44,7 @@ const Banner = () => {
                         </Link>
 
                         <Link
-                            href="/register"
+                            href="/add-studio"
                             className="btn btn-outline min-h-12 w-full border-base-content/20 bg-base-100 px-7 text-base font-semibold text-base-content transition-all hover:border-primary hover:bg-primary hover:text-primary-content sm:w-auto"
                         >
                             List Your Space

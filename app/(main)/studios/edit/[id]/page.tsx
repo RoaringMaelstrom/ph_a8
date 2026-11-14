@@ -436,7 +436,7 @@ const EditStudioPage = () => {
             <div className="grid gap-5 sm:grid-cols-3">
               <div>
                 <label className="label mb-2 font-semibold" htmlFor="hourlyRate">
-                  Hourly Rate (৳) *
+                  Hourly Rate ($) *
                 </label>
                 <input
                   id="hourlyRate"
@@ -453,7 +453,7 @@ const EditStudioPage = () => {
 
               <div>
                 <label className="label mb-2 font-semibold" htmlFor="securityDeposit">
-                  Security Deposit (৳) *
+                  Security Deposit ($) *
                 </label>
                 <input
                   id="securityDeposit"

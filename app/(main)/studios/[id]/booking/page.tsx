@@ -382,7 +382,7 @@ export default function BookingPage() {
                                         Estimated booking cost
                                     </p>
                                     <p className="text-2xl font-bold">
-                                        ৳{totalPrice.toLocaleString("en-BD")}
+                                        ${totalPrice.toLocaleString("en-US")}
                                     </p>
                                 </div>
 
@@ -452,7 +452,7 @@ export default function BookingPage() {
                                     Hourly rate
                                 </span>
                                 <span className="font-semibold">
-                                    ৳{studio.hourlyRate.toLocaleString("en-BD")}
+                                    ${studio.hourlyRate.toLocaleString("en-US")}
                                 </span>
                             </div>
 
@@ -461,7 +461,7 @@ export default function BookingPage() {
                                     Security deposit
                                 </span>
                                 <span className="font-semibold">
-                                    ৳{studio.securityDeposit.toLocaleString("en-BD")}
+                                    ${studio.securityDeposit.toLocaleString("en-US")}
                                 </span>
                             </div>
 

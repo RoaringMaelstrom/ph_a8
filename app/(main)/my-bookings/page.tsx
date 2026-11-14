@@ -181,7 +181,7 @@ const MyBookingsPage = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return `৳${amount.toLocaleString("en-BD")}`;
+    return `$${amount.toLocaleString("en-US")}`;
   };
 
   // Loading state.

@@ -129,7 +129,7 @@ const FeaturedSection = async () => {
                                         </span>
 
                                         <p className="text-lg font-bold text-primary">
-                                            ৳{studio.hourlyRate.toLocaleString("en-BD")}
+                                            ${studio.hourlyRate.toLocaleString("en-US")}
                                             <span className="ml-1 text-xs font-medium text-base-content/60">
                                                 / hour
                                             </span>

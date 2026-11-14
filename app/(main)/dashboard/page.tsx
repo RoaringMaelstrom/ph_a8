@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -26,13 +25,65 @@ interface Studio {
   image: string;
 }
 
+// Shape returned by GET /bookings/mine
 interface Booking {
   _id: string;
-  studioTitle: string;
-  bookingDate: string;
+  studioId: string;
+  bookingDate: string; // "YYYY-MM-DD"
+  startTime: string; // "HH:mm"
+  endTime: string; // "HH:mm"
   status: "Pending" | "Confirmed" | "Completed" | "Cancelled";
   totalPrice?: number;
+  studio: {
+    _id: string;
+    title: string;
+    category: string;
+    location: string;
+    image: string;
+    hourlyRate: number;
+  } | null;
 }
+
+// Shape returned by GET /bookings/owner/stats
+interface OwnerStats {
+  studios: number;
+  pending: number;
+  confirmed: number;
+  cancelled: number;
+  total: number;
+}
+
+// Fetch helper that surfaces the server's error message.
+const request = async <T,>(
+  url: string,
+  headers: HeadersInit,
+  label: string
+): Promise<T> => {
+  const response = await fetch(url, { headers, cache: "no-store" });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+
+    throw new Error(
+      `${label} API (${response.status}): ${
+        body?.message || `Failed to fetch ${label.toLowerCase()}.`
+      }`
+    );
+  }
+
+  return response.json() as Promise<T>;
+};
+
+// "YYYY-MM-DD" -> local date (avoids the UTC shift of new Date("YYYY-MM-DD")).
+const formatBookingDate = (value?: string) => {
+  if (!value) return "Date unavailable";
+
+  const [year, month, day] = value.split("-").map(Number);
+
+  if (!year || !month || !day) return "Date unavailable";
+
+  return new Date(year, month - 1, day).toLocaleDateString();
+};
 
 const DashboardPage = () => {
   const { data: session, isPending } = useSession();
@@ -40,6 +91,7 @@ const DashboardPage = () => {
 
   const [studios, setStudios] = useState<Studio[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [ownerStats, setOwnerStats] = useState<OwnerStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -50,80 +102,74 @@ const DashboardPage = () => {
     }
   }, [isPending, session, router]);
 
-  // Fetch the current user's listings and bookings
+  // Fetch the current user's listings, bookings and owner statistics
   useEffect(() => {
     if (isPending || !session) return;
 
+    let cancelled = false;
 
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        // Strip any trailing slash so URLs never contain "//".
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
 
         if (!apiUrl) {
           throw new Error("API URL is not configured.");
         }
 
         // Retrieve the JWT from Better Auth.
-        const { data, error } = await authClient.token();
+        const { data, error: tokenError } = await authClient.token();
 
-        if (error || !data?.token) {
+        if (tokenError || !data?.token) {
           throw new Error("Unable to retrieve authentication token.");
         }
 
-        // Attach the JWT to both backend requests.
+        // Attach the JWT to every backend request.
         const headers = {
           Authorization: `Bearer ${data.token}`,
         };
 
-        const [studioResponse, bookingResponse] = await Promise.all([
-          fetch(`${apiUrl}/studios/mine`, {
-            headers,
-            cache: "no-store",
-          }),
+        const [studioData, bookingData, statsData] = await Promise.all([
+          // Studios the user owns.
+          request<Studio[]>(`${apiUrl}/studios/mine`, headers, "Studios"),
 
-          fetch(`${apiUrl}/bookings/mine`, {
+          // Bookings the user made as a customer.
+          request<Booking[]>(`${apiUrl}/bookings/mine`, headers, "Bookings"),
+
+          // Booking counts for requests received on the user's studios.
+          request<OwnerStats>(
+            `${apiUrl}/bookings/owner/stats`,
             headers,
-            cache: "no-store",
-          }),
+            "Booking statistics"
+          ),
         ]);
 
-        if (!studioResponse.ok) {
-          const error = await studioResponse.json();
-
-          throw new Error(
-            `Studios API (${studioResponse.status}): ${error.message || "Failed to fetch studios."
-            }`
-          );
-        }
-
-        if (!bookingResponse.ok) {
-          const error = await bookingResponse.json();
-
-          throw new Error(
-            `Bookings API (${bookingResponse.status}): ${error.message || "Failed to fetch bookings."
-            }`
-          );
-        }
-
-        const studioData = await studioResponse.json();
-        const bookingData = await bookingResponse.json();
+        if (cancelled) return;
 
         setStudios(studioData);
         setBookings(bookingData);
-
+        setOwnerStats(statsData);
       } catch (err) {
         console.error("Dashboard fetch error:", err);
-        setError("We couldn't load your dashboard. Please try again.");
+
+        if (!cancelled) {
+          setError("We couldn't load your dashboard. Please try again.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-
     fetchDashboardData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isPending, session]);
 
   if (isPending || !session) {
@@ -134,14 +180,6 @@ const DashboardPage = () => {
     );
   }
 
-  const pendingBookings = bookings.filter(
-    (booking) => booking.status === "Pending"
-  ).length;
-
-  const confirmedBookings = bookings.filter(
-    (booking) => booking.status === "Confirmed"
-  ).length;
-
   const stats = [
     {
       title: "My Studios",
@@ -151,19 +189,19 @@ const DashboardPage = () => {
     },
     {
       title: "Total Bookings",
-      value: bookings.length,
-      description: "All reservations",
+      value: ownerStats?.total ?? 0,
+      description: "Reservations on your studios",
       icon: CalendarDays,
     },
     {
       title: "Pending",
-      value: pendingBookings,
-      description: "Awaiting confirmation",
+      value: ownerStats?.pending ?? 0,
+      description: "Awaiting your confirmation",
       icon: Clock,
     },
     {
       title: "Confirmed",
-      value: confirmedBookings,
+      value: ownerStats?.confirmed ?? 0,
       description: "Confirmed reservations",
       icon: CheckCircle2,
     },
@@ -284,7 +322,7 @@ const DashboardPage = () => {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <Link
-              href="/add-studio"
+              href="/my-listings/confirm-bookings"
               className="group flex items-center justify-between rounded-2xl border border-base-300 bg-base-100 p-5 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-md"
             >
               <div className="flex items-center gap-4">
@@ -293,10 +331,14 @@ const DashboardPage = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-base-content">
-                    Add New Studio
+                    Confirm Your Bookings
                   </h3>
                   <p className="mt-1 text-xs text-base-content/55">
-                    Share your creative space
+                    {!loading && (ownerStats?.pending ?? 0) > 0
+                      ? `${ownerStats?.pending} pending ${
+                          ownerStats?.pending === 1 ? "request" : "requests"
+                        } to review`
+                      : "Review booking requests"}
                   </p>
                 </div>
               </div>
@@ -393,14 +435,15 @@ const DashboardPage = () => {
                   >
                     <div>
                       <h3 className="font-semibold text-base-content">
-                        {booking.studioTitle || "Studio Reservation"}
+                        {booking.studio?.title || "Studio Reservation"}
                       </h3>
 
                       <p className="mt-1 flex items-center gap-1.5 text-sm text-base-content/55">
                         <CalendarDays size={14} />
-                        {booking.bookingDate
-                          ? new Date(booking.bookingDate).toLocaleDateString()
-                          : "Date unavailable"}
+                        {formatBookingDate(booking.bookingDate)}
+                        {booking.startTime && booking.endTime
+                          ? ` · ${booking.startTime} – ${booking.endTime}`
+                          : ""}
                       </p>
                     </div>
 

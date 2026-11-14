@@ -286,7 +286,7 @@ const MyListingsPage = () => {
                         Hourly rate
                       </p>
                       <p className="text-lg font-bold text-primary">
-                        ৳{studio.hourlyRate}
+                        ${studio.hourlyRate}
                         <span className="text-xs font-normal text-base-content/50">
                           {" "}/ hour
                         </span>

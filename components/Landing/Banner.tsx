@@ -78,17 +78,6 @@ const Banner = () => {
 
                         {/* Image overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
-                        {/* Image caption */}
-                        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
-                            <p className="text-sm font-medium text-white/75">
-                                Make room for creativity
-                            </p>
-
-                            <h2 className="mt-1 text-xl font-bold text-white sm:text-2xl">
-                                Your next project starts here.
-                            </h2>
-                        </div>
                     </div>
 
                     {/* Floating information card */}

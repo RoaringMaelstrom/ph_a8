@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, MapPin, Users } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import BookingSkeleton from "@/components/Shared/BookingSkeleton";
 import toast from "react-hot-toast";
 
 interface Studio {
@@ -207,18 +208,7 @@ export default function BookingPage() {
     };
 
     if (loadingStudio) {
-        return (
-            <main className="mx-auto max-w-7xl animate-pulse px-4 py-12">
-                <div className="mb-8 h-6 w-40 rounded bg-base-300" />
-                <div className="grid gap-8 lg:grid-cols-3">
-                    <div className="space-y-5 lg:col-span-2">
-                        <div className="h-72 rounded-2xl bg-base-300" />
-                        <div className="h-48 rounded-2xl bg-base-300" />
-                    </div>
-                    <div className="h-96 rounded-2xl bg-base-300" />
-                </div>
-            </main>
-        );
+        return <BookingSkeleton />;
     }
 
     if (!studio) {
